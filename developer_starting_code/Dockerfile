@@ -1,5 +1,5 @@
-# Use an official Python runtime as a base image
-FROM python:3.10-slim
+# Use the official Python 3.9 slim image as the base
+FROM python:3.9-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
