@@ -77,3 +77,13 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
+
+
+Devops Part
+Kubernetes Files
+deployment.yaml: Defines how your application pods are deployed and managed in the cluster, including replicas and resource limits.
+service.yaml: Exposes your application to the external network using a LoadBalancer.
+hpa.yaml: Configures Horizontal Pod Autoscaler to automatically adjust the number of pods based on CPU or memory usage.
+Build and CI/CD Files
+cloudbuild.yaml: Configures Google Cloud Build to build the Docker image, push it to the container registry, and deploy it to GKE.
+gke-deploy.yml: GitHub Actions workflow to automate the build, push, and deployment process upon changes to the repository.
