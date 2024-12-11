@@ -8,14 +8,11 @@ steps:
   - 'apply'
   - '-f'
   - 'kubernetes/deployment.yaml'
-  env:
-  - 'CLOUDSDK_COMPUTE_ZONE=$COMPUTE_ZONE'
-  - 'CLOUDSDK_CONTAINER_CLUSTER=$CLUSTER_NAME'
 - name: 'gcr.io/cloud-builders/kubectl'
   args:
   - 'apply'
   - '-f'
-  - 'kubernetes/service.yaml'
+  - 'kubernetes/hpa.yaml'
 substitutions:
   _COMPUTE_ZONE: [YOUR_COMPUTE_ZONE]
   _CLUSTER_NAME: [YOUR_CLUSTER_NAME]

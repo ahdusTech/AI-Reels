@@ -19,3 +19,10 @@ spec:
         image: gcr.io/[PROJECT_ID]/ai-reels:latest
         ports:
         - containerPort: 8080
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
