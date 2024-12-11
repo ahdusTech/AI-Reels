@@ -1,0 +1,34 @@
+name: Deploy to GKE
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCLOUD_SERVICE_KEY }}
+
+    - name: Configure gcloud
+      run: |
+        gcloud config set project [PROJECT_ID]
+        gcloud config set compute/zone [COMPUTE_ZONE]
+        gcloud container clusters get-credentials [CLUSTER_NAME]
+
+    - name: Build and push Docker image
+      run: |
+        gcloud builds submit --tag gcr.io/[PROJECT_ID]/ai-reels:$GITHUB_SHA
+
+    - name: Deploy to GKE
+      run: |
+        kubectl apply -f kubernetes/deployment.yaml
+        kubectl apply -f kubernetes/service.yaml
