@@ -1,0 +1,21 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/ai-reels:$SHORT_SHA', '.']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/ai-reels:$SHORT_SHA']
+- name: 'gcr.io/cloud-builders/kubectl'
+  args:
+  - 'apply'
+  - '-f'
+  - 'kubernetes/deployment.yaml'
+  env:
+  - 'CLOUDSDK_COMPUTE_ZONE=$COMPUTE_ZONE'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=$CLUSTER_NAME'
+- name: 'gcr.io/cloud-builders/kubectl'
+  args:
+  - 'apply'
+  - '-f'
+  - 'kubernetes/service.yaml'
+substitutions:
+  _COMPUTE_ZONE: [YOUR_COMPUTE_ZONE]
+  _CLUSTER_NAME: [YOUR_CLUSTER_NAME]

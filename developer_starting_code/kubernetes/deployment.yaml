@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-reels
+  labels:
+    app: ai-reels
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ai-reels
+  template:
+    metadata:
+      labels:
+        app: ai-reels
+    spec:
+      containers:
+      - name: ai-reels
+        image: gcr.io/[PROJECT_ID]/ai-reels:latest
+        ports:
+        - containerPort: 8080
