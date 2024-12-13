@@ -3,7 +3,7 @@ name: Deploy to Google Kubernetes Engine
 on:
   push:
     branches:
-      - main1
+      - main
   workflow_dispatch:  # Allows for manual trigger from the GitHub UI
 
 jobs:
