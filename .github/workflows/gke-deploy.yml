@@ -1,15 +1,15 @@
-name: Build and Deploy to Google Kubernetes Engine
+name: Deploy to Google Kubernetes Engine
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Allows manual triggering from the GitHub UI
+  workflow_dispatch:  # Allows for manual triggering from the GitHub UI
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}  # Google Cloud Project ID
   GKE_CLUSTER: minimal-gke-cluster           # GKE Cluster Name
-  GKE_ZONE: us-central1-a                    # GKE Cluster Zone
+  GKE_REGION: us-central1                    # GKE Cluster Region
   IMAGE: my-app                              # Name of the Docker image
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v1
@@ -26,15 +26,15 @@ jobs:
 
     - name: Set up Google Cloud SDK
       run: |
-        gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+        gcloud auth activate-service-account --key-file=${{ secrets.GCLOUD_SERVICE_KEY }}
         gcloud config set project ${{ env.PROJECT_ID }}
-        gcloud config set compute/zone ${{ env.GKE_ZONE }}
-        gcloud container clusters get-credentials ${{ env.GKE_CLUSTER }}
+        gcloud config set compute/region ${{ env.GKE_REGION }}
+        gcloud container clusters get-credentials ${{ env.GKE_CLUSTER }} --region ${{ env.GKE_REGION }}
 
     - name: Build Docker image
       run: |
-        docker build -f developer_starting_code/Dockerfile -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }} developer_starting_code
-
+        docker build -f Dockerfile -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }} .
+        
     - name: Push Docker image to Google Container Registry
       run: |
         echo "Pushing Docker image..."
@@ -47,4 +47,3 @@ jobs:
     - name: Verify deployment
       run: |
         kubectl rollout status deployment/my-app-deployment
-
