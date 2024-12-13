@@ -3,7 +3,7 @@ name: Deploy to Google Kubernetes Engine
 on:
   push:
     branches:
-      - main
+      - main1
   workflow_dispatch:  # Allows for manual trigger from the GitHub UI
 
 jobs:
@@ -22,28 +22,21 @@ jobs:
 
     - name: Set up Cloud SDK
       run: |
-        echo "Setting up Google Cloud SDK..."
         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
         gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
         gcloud config set compute/region us-central1
         gcloud container clusters get-credentials ${{ secrets.GCP_CLUSTER_NAME }} --region us-central1
-        echo "Google Cloud SDK set up completed."
 
     - name: Build and Push Docker Image
       run: |
-        echo "Building Docker image..."
         cd developer_starting_code
         docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }} .
-        echo "Pushing Docker image..."
         docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }}
-        echo "Docker image pushed successfully."
 
     - name: Deploy to Kubernetes
       run: |
-        echo "Deploying to Kubernetes..."
-        kubectl apply -f developer_starting_code/kubernetes/deployment.yaml
-        kubectl apply -f developer_starting_code/kubernetes/hpa.yaml
-        echo "Deployment completed successfully."
+        kubectl apply -f kubernetes/deployment.yaml
+        kubectl apply -f kubernetes/hpa.yaml
 
 env:
-  GOOGLE_APPLICATION_CREDENTIALS: /home/runner/work/AI-Reels/AI-Reels/gha-creds-e182b3f84824108e.json
+  GOOGLE_APPLICATION_CREDENTIALS: /home/runner/work/_temp/gha-creds-e182b3f84824108e.json
