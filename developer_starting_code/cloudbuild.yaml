@@ -1,14 +1,14 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/$PROJECT_ID/ai-reels:$SHORT_SHA', '.']
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/my-app:$SHORT_SHA', './developer_starting_code']
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/ai-reels:$SHORT_SHA']
+  args: ['push', 'gcr.io/$PROJECT_ID/my-app:$SHORT_SHA']
 - name: 'gcr.io/cloud-builders/gcloud'
   args:
     - 'container'
     - 'clusters'
     - 'get-credentials'
-    - 'minimal-gke-cluster'
+    - '$CLUSTER_NAME'
     - '--region'
     - 'us-central1'
 - name: 'gcr.io/cloud-builders/kubectl'
