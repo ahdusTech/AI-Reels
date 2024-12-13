@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   setup-deploy:
@@ -25,13 +25,13 @@ jobs:
         echo "Setting up Google Cloud SDK..."
         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
         gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
-        gcloud config set compute/zone ${{ secrets.GCP_COMPUTE_ZONE }}
+        gcloud config set compute/region us-central1
         echo "Google Cloud SDK set up completed."
 
     - name: Get GKE Cluster Credentials
       run: |
         echo "Fetching credentials for GKE cluster..."
-        if gcloud container clusters get-credentials ${{ secrets.GCP_CLUSTER_NAME }} --zone ${{ secrets.GCP_COMPUTE_ZONE }}; then
+        if gcloud container clusters get-credentials minimal-gke-cluster --region us-central1; then
           echo "Successfully retrieved GKE cluster credentials."
         else
           echo "Failed to fetch GKE cluster credentials."
@@ -40,15 +40,11 @@ jobs:
 
     - name: Build and Push Docker Image
       run: |
-        echo "Building Docker image..."
         docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }} .
-        echo "Pushing Docker image..."
         docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }}
-        echo "Docker image pushed successfully."
 
     - name: Deploy to Kubernetes
       run: |
-        echo "Deploying to Kubernetes..."
         kubectl apply -f path/to/your/kubernetes/deployment.yaml
         kubectl apply -f path/to/your/kubernetes/hpa.yaml
         echo "Deployment completed successfully."
