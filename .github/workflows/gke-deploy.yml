@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:  # Allows manual triggering from the GitHub UI
 
 jobs:
   build-deploy:
@@ -16,17 +17,17 @@ jobs:
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v1
       with:
-        credentials_json: ${{ secrets.GCLOUD_SERVICE_KEY }}
+        credentials_json: ${{ secrets.CLOUD_SERVICE_KEY }}
 
     - name: Configure gcloud
       run: |
-        gcloud config set project [PROJECT_ID]
-        gcloud config set compute/zone [COMPUTE_ZONE]
-        gcloud container clusters get-credentials [CLUSTER_NAME]
+        gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+        gcloud config set compute/zone ${{ secrets.GCP_COMPUTE_ZONE }}
+        gcloud container clusters get-credentials ${{ secrets.GCP_CLUSTER_NAME }}
 
     - name: Build and push Docker image
       run: |
-        gcloud builds submit --tag gcr.io/[PROJECT_ID]/ai-reels:$GITHUB_SHA
+        gcloud builds submit --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ai-reels:${{ github.sha }}
 
     - name: Deploy to GKE
       run: |

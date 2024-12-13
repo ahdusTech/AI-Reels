@@ -3,16 +3,29 @@ steps:
   args: ['build', '-t', 'gcr.io/$PROJECT_ID/ai-reels:$SHORT_SHA', '.']
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'gcr.io/$PROJECT_ID/ai-reels:$SHORT_SHA']
+- name: 'gcr.io/cloud-builders/gcloud'
+  args:
+    - 'container'
+    - 'clusters'
+    - 'get-credentials'
+    - 'minimal-gke-cluster'
+    - '--region'
+    - 'us-central1'
 - name: 'gcr.io/cloud-builders/kubectl'
   args:
-  - 'apply'
-  - '-f'
-  - 'kubernetes/deployment.yaml'
+    - 'apply'
+    - '-f'
+    - 'developer_starting_code/kubernetes/deployment.yaml'
 - name: 'gcr.io/cloud-builders/kubectl'
   args:
-  - 'apply'
-  - '-f'
-  - 'kubernetes/hpa.yaml'
+    - 'apply'
+    - '-f'
+    - 'developer_starting_code/kubernetes/hpa.yaml'
 substitutions:
-  _COMPUTE_ZONE: [YOUR_COMPUTE_ZONE]
-  _CLUSTER_NAME: [YOUR_CLUSTER_NAME]
+  _CLUSTER_NAME: 'minimal-gke-cluster'
+  _REGION: 'us-central1'
+  _ZONES: 'us-central1-c,us-central1-b,us-central1-f'
+options:
+  env:
+  - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
+  - 'CLOUDSDK_COMPUTE_REGION=us-central1'
