@@ -1,4 +1,4 @@
-name: Build and Deploy to Google Kubernetes Engine
+name: Deploy to Google Kubernetes Engine
 
 on:
   push:
@@ -22,12 +22,12 @@ jobs:
 
     - name: Setup Google Cloud Credentials
       run: |
-        echo "${{ secrets.GCLOUD_SERVICE_KEY }}" > gcloud-service-key.json
+        echo "${{ secrets.GCLOUD_SERVICE_KEY }}" > "${{ github.workspace }}/gcloud-service-key.json"
         echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/gcloud-service-key.json" >> $GITHUB_ENV
 
     - name: Authenticate to Google Cloud
       run: |
-        gcloud auth activate-service-account --key-file=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
+        gcloud auth activate-service-account --key-file="${{ env.GOOGLE_APPLICATION_CREDENTIALS }}"
         gcloud config set project ${{ env.PROJECT_ID }}
         gcloud config set compute/region ${{ env.GKE_REGION }}
         gcloud container clusters get-credentials ${{ env.GKE_CLUSTER }} --region ${{ env.GKE_REGION }}
@@ -38,7 +38,6 @@ jobs:
         
     - name: Push Docker image to Google Container Registry
       run: |
-        echo "Pushing Docker image..."
         gcloud auth configure-docker --quiet
         docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
 
