@@ -3,7 +3,7 @@ name: Build and Deploy to Google Kubernetes Engine
 on:
   push:
     branches:
-      - main
+      - main1
   workflow_dispatch:
 
 jobs:
