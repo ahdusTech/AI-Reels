@@ -20,6 +20,10 @@ jobs:
         service_account_key: ${{ secrets.GCLOUD_SERVICE_KEY }}
         export_default_credentials: true
 
+    - name: Configure Docker
+      run: |
+        gcloud auth configure-docker --quiet
+
     - name: Build Docker image
       run: |
         cd developer_starting_code
@@ -27,7 +31,6 @@ jobs:
 
     - name: Push Docker image to Google Container Registry
       run: |
-        gcloud auth configure-docker --quiet
         docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }}
 
     - name: Get GKE credentials
