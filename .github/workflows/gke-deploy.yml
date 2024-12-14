@@ -37,6 +37,15 @@ jobs:
       run: |
         gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --region ${{ secrets.GKE_REGION }}
 
+    - name: List Files in Kubernetes Directory
+      run: |
+        ls -alh developer_starting_code/kubernetes/
+
+    - name: Display Kubectl Config
+      run: |
+        kubectl config view
+        kubectl config current-context
+
     - name: Deploy to Google Kubernetes Engine
       run: |
         kubectl apply -f developer_starting_code/kubernetes/deployment.yaml
