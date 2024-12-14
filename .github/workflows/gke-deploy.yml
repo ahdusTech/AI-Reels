@@ -49,7 +49,7 @@ jobs:
     - name: Deploy to Google Kubernetes Engine
       run: |
         kubectl apply -f developer_starting_code/kubernetes/deployment.yaml
-        kubectl apply -f developer_starting_code/kubernetes/hpa.yaml
+        kubectl apply -f developer_starting_code/kubernetes/hpa.yml
         kubectl apply -f developer_starting_code/kubernetes/service.yaml
 
     - name: Verify deployment
