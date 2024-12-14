@@ -20,11 +20,8 @@ jobs:
         service_account_key: ${{ secrets.GCLOUD_SERVICE_KEY }}
         export_default_credentials: true
 
-    - name: Install gke-gcloud-auth-plugin
-      run: |
-        curl -Lo gke-gcloud-auth-plugin https://storage.googleapis.com/gke-gcloud-auth-plugin/release/latest/bin/linux/amd64/gke-gcloud-auth-plugin
-        chmod +x gke-gcloud-auth-plugin
-        sudo mv gke-gcloud-auth-plugin /usr/local/bin/
+    - name: Install GKE gcloud Auth Plugin
+      uses: simenandre/setup-gke-gcloud-auth-plugin@v1
 
     - name: Build Docker image
       run: |
