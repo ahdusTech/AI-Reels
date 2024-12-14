@@ -3,7 +3,7 @@ name: Build and Deploy to Google Kubernetes Engine
 on:
   push:
     branches:
-      - main1
+      - main
   workflow_dispatch:
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
       run: |
         cd developer_starting_code
         docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }} .
-        
+
     - name: Push Docker image to Google Container Registry
       run: |
         gcloud auth configure-docker --quiet
