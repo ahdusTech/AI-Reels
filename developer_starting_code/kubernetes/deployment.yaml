@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ai-reels
+  namespace: default
   labels:
     app: ai-reels
 spec:
@@ -15,16 +16,14 @@ spec:
         app: ai-reels
     spec:
       containers:
-      - name: ai-reels
-        # Ensure the image path is correctly specified
-        image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }}
-        ports:
-        - containerPort: 8080
-        resources:
-          # Adjust resources based on the node's capability
-          requests:
-            cpu: "1000m"  # 1 CPU
-            memory: "2Gi"  # 2 GB
-          limits:
-            cpu: "2000m"  # 2 CPUs
-            memory: "4Gi"  # 4 GB
+        - name: ai-reels
+          image: gcr.io/ai-reels-443509/my-app:0ecf59e41bcee72dd2ec63065b489f6f39a22e2f
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "1000m"  # 1 CPU, adjust as needed
+              memory: "2Gi"  # 2 GB, adjust as needed
+            limits:
+              cpu: "2000m"  # 2 CPUs, adjust as needed
+              memory: "4Gi"  # 4 GB, adjust as needed
