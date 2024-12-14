@@ -20,10 +20,6 @@ jobs:
         service_account_key: ${{ secrets.GCLOUD_SERVICE_KEY }}
         export_default_credentials: true
 
-    - name: Install GKE gcloud Auth Plugin
-      run: |
-        gcloud components install gke-gcloud-auth-plugin
-
     - name: Build Docker image
       run: |
         cd developer_starting_code
@@ -40,8 +36,9 @@ jobs:
 
     - name: Deploy to Google Kubernetes Engine
       run: |
-        kubectl apply -f developer_starting_code/kubernetes/deployment.yaml
-        kubectl apply -f developer_starting_code/kubernetes/hpa.yaml
+        kubectl apply -f kubernetes/deployment.yaml
+        kubectl apply -f kubernetes/hpa.yaml
+      working-directory: developer_starting_code  # Set the working directory for deployment
 
     - name: Verify deployment
       run: |
