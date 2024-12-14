@@ -1,16 +1,17 @@
-name: Deploy to Google Kubernetes Engine
+name: Build and Deploy to Google Kubernetes Engine
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Allows for manual triggering from the GitHub UI
+  workflow_dispatch:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}  # Google Cloud Project ID
   GKE_CLUSTER: minimal-gke-cluster           # GKE Cluster Name
   GKE_REGION: us-central1                    # GKE Cluster Region
   IMAGE: my-app                              # Name of the Docker image
+  IMAGE_TAG: ${{ github.sha }}               # Unique image tag based on commit SHA
 
 jobs:
   build-and-deploy:
@@ -19,30 +20,31 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v2
 
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
-      with:
-        credentials_json: ${{ secrets.GCLOUD_SERVICE_KEY }}
-
-    - name: Set up Google Cloud SDK
+    - name: Setup Google Cloud Credentials
       run: |
-        gcloud auth activate-service-account --key-file=${{ secrets.GCLOUD_SERVICE_KEY }}
+        echo "${{ secrets.GCLOUD_SERVICE_KEY }}" > gcloud-service-key.json
+        echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/gcloud-service-key.json" >> $GITHUB_ENV
+
+    - name: Authenticate to Google Cloud
+      run: |
+        gcloud auth activate-service-account --key-file=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
         gcloud config set project ${{ env.PROJECT_ID }}
         gcloud config set compute/region ${{ env.GKE_REGION }}
         gcloud container clusters get-credentials ${{ env.GKE_CLUSTER }} --region ${{ env.GKE_REGION }}
 
     - name: Build Docker image
       run: |
-        docker build -f Dockerfile -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }} .
+        docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ env.IMAGE_TAG }} .
         
     - name: Push Docker image to Google Container Registry
       run: |
         echo "Pushing Docker image..."
-        docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }}
+        gcloud auth configure-docker --quiet
+        docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
 
     - name: Deploy to Google Kubernetes Engine
       run: |
-        kubectl set image deployment/my-app-deployment my-app=gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }} --record
+        kubectl set image deployment/my-app-deployment my-app=gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ env.IMAGE_TAG }} --record
 
     - name: Verify deployment
       run: |
