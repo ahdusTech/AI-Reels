@@ -312,8 +312,27 @@ def generate_transcript(input_file):
         try:
             command = f"auto_subtitle {input_file} --srt_only True --output_srt True -o {UPLOAD_DIR}/ --model medium"
             logging.info(f"Running command: {command}")
-            subprocess.call(command, shell=True)
+            
+            # Use Popen to capture real-time output
+            process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            
+            # Read output line by line
+            for line in process.stdout:
+                logging.info(line.strip())
+            
+            # Wait for the process to complete
+            process.wait()
+            
+            # Check for errors
+            if process.returncode != 0:
+                error_output = process.stderr.read()
+                logging.error(f"Command failed with error: {error_output}")
+                raise HTTPException(status_code=500, detail=f"Error generating subtitle file: {error_output}")
+            
             logging.info(f"Subtitle file {srt_file} generated.")
+        except subprocess.TimeoutExpired:
+            logging.error("Subtitle generation command timed out.")
+            raise HTTPException(status_code=500, detail="Subtitle generation command timed out.")
         except Exception as e:
             logging.error(f"Error generating subtitle file for {input_file}: {e}")
             raise HTTPException(status_code=500, detail=f"Error generating subtitle file for {input_file}: {e}")
