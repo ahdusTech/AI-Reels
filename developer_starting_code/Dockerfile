@@ -29,4 +29,4 @@ COPY . .
 EXPOSE 8000
 
 # Command to run the FastAPI application using Gunicorn
-CMD ["gunicorn", "fast_api_add_reel_handling_gausian_working:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "fast_api_add_reel_handling_gausian_working:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--timeout", "1800"]
