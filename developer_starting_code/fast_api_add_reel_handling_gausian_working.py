@@ -11,7 +11,7 @@ import openai
 from dotenv import load_dotenv
 import cv2
 import numpy as np
-
+from google.cloud import secretmanager
 app = FastAPI()
 
 # Setup logging
@@ -19,11 +19,22 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 
 # Load environment variables
 load_dotenv()
-openai.api_key = "projects/557964912809/secrets/ai-reels-secret"
+
+
+def get_secret(secret_id):
+    client = secretmanager.SecretManagerServiceClient()
+    name = f"projects/557964912809/secrets/{secret_id}/versions/latest"
+    response = client.access_secret_version(request={"name": name})
+    secret_payload = response.payload.data.decode("UTF-8")
+    return secret_payload
+
+# Load the OpenAI API key from Secret Manager
+openai.api_key = get_secret("ai-reels-secret")
 if not openai.api_key:
     raise ValueError("OpenAI API key is not set. Please check your environment variables.")
 else:
-    logging.info(f"OpenAI API key loaded from environment variable")
+    logging.info("OpenAI API key loaded from Secret Manager.")
+
 MODEL = "gpt-4o-mini"
 client = openai.OpenAI(api_key=openai.api_key)
 
@@ -37,6 +48,11 @@ os.makedirs(RESULTS_DIR, exist_ok=True)
 @app.post("/upload/")
 async def upload_video(file: UploadFile = File(...)):
     logging.info(f"Received upload request for file: {file.filename}")
+    if openai.api_key is None:
+        raise ValueError("OpenAI API key is not set. Please check your environment variables.")
+    else:
+        logging.info("OpenAI API key loaded from Secret Manager.")
+
     file_path = os.path.join(UPLOAD_DIR, file.filename)
     try:
         with open(file_path, "wb") as buffer:
