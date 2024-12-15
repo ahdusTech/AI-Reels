@@ -304,9 +304,15 @@ def generate_transcript(input_file):
         logging.info(f"Subtitle file {srt_file} already exists. Using existing file.")
     else:
         logging.info(f"Generating subtitle file for {input_file}.")
-        command = f"auto_subtitle {input_file} --srt_only True --output_srt True -o {UPLOAD_DIR}/ --model medium"
-        subprocess.call(command, shell=True)
-        logging.info(f"Subtitle file {srt_file} generated.")
+        try:
+            command = f"auto_subtitle {input_file} --srt_only True --output_srt True -o {UPLOAD_DIR}/ --model medium"
+            logging.info(f"Running command: {command}")
+            subprocess.call(command, shell=True)
+            logging.info(f"Subtitle file {srt_file} generated.")
+        except Exception as e:
+            logging.error(f"Error generating subtitle file for {input_file}: {e}")
+            raise HTTPException(status_code=500, detail=f"Error generating subtitle file for {input_file}: {e}")
+
     # Read and return the subtitle content
     try:
         with open(srt_file, 'r', encoding='utf-8') as file:
