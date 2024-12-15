@@ -15,7 +15,7 @@ import numpy as np
 app = FastAPI()
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Load environment variables
 load_dotenv()
@@ -32,14 +32,18 @@ os.makedirs(RESULTS_DIR, exist_ok=True)
 
 @app.post("/upload/")
 async def upload_video(file: UploadFile = File(...)):
+    logging.info(f"Received upload request for file: {file.filename}")
     file_path = os.path.join(UPLOAD_DIR, file.filename)
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    # Process the video
     try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        logging.info(f"File {file.filename} saved to {file_path}")
+
+        # Process the video
         process_video(file_path)
+        logging.info(f"Video {file.filename} processed successfully")
     except Exception as e:
+        logging.error(f"Error processing video {file.filename}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
     return {"filename": file.filename, "message": "Video processed successfully."}
@@ -72,44 +76,58 @@ RESULTS_DIR = "./results"  # Change this to your desired results directory
 
 
 def process_video(input_video_path):
+    logging.info(f"Starting video processing for {input_video_path}")
     video_id = os.path.basename(input_video_path).split('.')[0]
     output_folder = os.path.join(RESULTS_DIR, video_id)
     os.makedirs(output_folder, exist_ok=True)
+    logging.debug(f"Output folder created at {output_folder}")
 
-    # Example processing logic
-    transcript = generate_transcript(input_video_path)
-    viral_segments = generate_viral(transcript, video_id)
-    viral_segments = json.loads(viral_segments)
+    try:
+        # Example processing logic
+        transcript = generate_transcript(input_video_path)
+        logging.debug(f"Transcript generated for {input_video_path}")
 
-    for i, segment in enumerate(viral_segments['segments']):
-        start_time = parse_time(segment.get("start_time", "0:00:00"))
-        end_time = parse_time(segment.get("end_time", "0:00:00"))
+        viral_segments = generate_viral(transcript, video_id)
+        logging.debug(f"Viral segments generated for {video_id}")
 
-        # Output file for the current segment
-        output_file = os.path.join(output_folder, f"output{str(i).zfill(3)}.mp4")
+        viral_segments = json.loads(viral_segments)
 
-        # Extract video segment
-        command = f"ffmpeg -y -i {input_video_path} -vf scale='1920:1080' -qscale:v 3 -b:v 6000k -ss {start_time} -to {end_time} -copyts {output_file}"
-        subprocess.call(command, shell=True)
+        for i, segment in enumerate(viral_segments['segments']):
+            logging.info(f"Processing segment {i} for video {video_id}")
+            start_time = parse_time(segment.get("start_time", "0:00:00"))
+            end_time = parse_time(segment.get("end_time", "0:00:00"))
 
-        # Prepare paths for further processing
-        temp_video_path = os.path.join(output_folder, f"temp_output_video_{str(i).zfill(3)}.mp4")
-        audio_path = os.path.join(output_folder, f"extracted_audio_{str(i).zfill(3)}.aac")
-        final_output_video_path = os.path.join(output_folder, f"final_video_{str(i).zfill(3)}.mp4")
-        final_with_subtitles_path = os.path.join(output_folder, f"final_video_with_subtitles_{str(i).zfill(3)}.mp4")
+            # Output file for the current segment
+            output_file = os.path.join(output_folder, f"output{str(i).zfill(3)}.mp4")
+            logging.debug(f"Output file path: {output_file}")
 
-        # Video processing
-        video_file_specs = preprocess_video(output_file)
-        resolution_needs = resolution_specs("reels")
-        process_video_with_dynamic_padding(output_file, resolution_needs, temp_video_path, video_file_specs)
+            # Extract video segment
+            command = f"ffmpeg -y -i {input_video_path} -vf scale='1920:1080' -qscale:v 3 -b:v 6000k -ss {start_time} -to {end_time} -copyts {output_file}"
+            subprocess.call(command, shell=True)
+            logging.info(f"Video segment {i} extracted to {output_file}")
 
-        # Extract audio
-        extract_audio(output_file, audio_path)
+            # Prepare paths for further processing
+            temp_video_path = os.path.join(output_folder, f"temp_output_video_{str(i).zfill(3)}.mp4")
+            audio_path = os.path.join(output_folder, f"extracted_audio_{str(i).zfill(3)}.aac")
+            final_output_video_path = os.path.join(output_folder, f"final_video_{str(i).zfill(3)}.mp4")
+            final_with_subtitles_path = os.path.join(output_folder, f"final_video_with_subtitles_{str(i).zfill(3)}.mp4")
 
-        # Combine video and audio
-        combine_video_audio(temp_video_path, audio_path, final_output_video_path)
-        #add_subtitles(segment, transcript, final_output_video_path, final_with_subtitles_path)
-        logging.info(f"Video segment {i} processing complete with subtitles: {final_with_subtitles_path}")
+            # Video processing
+            video_file_specs = preprocess_video(output_file)
+            resolution_needs = resolution_specs("reels")
+            process_video_with_dynamic_padding(output_file, resolution_needs, temp_video_path, video_file_specs)
+
+            # Extract audio
+            extract_audio(output_file, audio_path)
+
+            # Combine video and audio
+            combine_video_audio(temp_video_path, audio_path, final_output_video_path)
+            #add_subtitles(segment, transcript, final_output_video_path, final_with_subtitles_path)
+            logging.info(f"Video segment {i} processing complete with subtitles: {final_with_subtitles_path}")
+
+    except Exception as e:
+        logging.error(f"Error during video processing: {e}")
+        raise
 
 
 def add_subtitles(segment, transcript, final_output_video_path, final_with_subtitles_path):
