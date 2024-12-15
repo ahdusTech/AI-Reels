@@ -46,6 +46,10 @@ jobs:
         kubectl config view
         kubectl config current-context
 
+    - name: Update Kubernetes Deployment
+      run: |
+        sed -i "s/IMAGE_TAG/${{ github.sha }}/g" developer_starting_code/kubernetes/deployment.yaml
+
     - name: Deploy to Google Kubernetes Engine
       run: |
         kubectl apply -f developer_starting_code/kubernetes/deployment.yaml

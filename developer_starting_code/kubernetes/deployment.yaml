@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: ai-reels
-          image: gcr.io/ai-reels-443509/my-app:0ecf59e41bcee72dd2ec63065b489f6f39a22e2f
+          image: gcr.io/ai-reels-443509/my-app:IMAGE_TAG
           ports:
             - containerPort: 8080
           resources:
