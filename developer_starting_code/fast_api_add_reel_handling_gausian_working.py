@@ -19,7 +19,11 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 
 # Load environment variables
 load_dotenv()
-openai.api_key = "add openai key"
+openai.api_key = "projects/557964912809/secrets/ai-reels-secret"
+if not openai.api_key:
+    raise ValueError("OpenAI API key is not set. Please check your environment variables.")
+else:
+    logging.info(f"OpenAI API key loaded from environment variable")
 MODEL = "gpt-4o-mini"
 client = openai.OpenAI(api_key=openai.api_key)
 
@@ -302,10 +306,14 @@ def generate_transcript(input_file):
         logging.info(f"Generating subtitle file for {input_file}.")
         command = f"auto_subtitle {input_file} --srt_only True --output_srt True -o {UPLOAD_DIR}/ --model medium"
         subprocess.call(command, shell=True)
-
+        logging.info(f"Subtitle file {srt_file} generated.")
     # Read and return the subtitle content
-    with open(srt_file, 'r', encoding='utf-8') as file:
-        return file.read()
+    try:
+        with open(srt_file, 'r', encoding='utf-8') as file:
+            return file.read()
+    except FileNotFoundError:
+        logging.error(f"Subtitle file {srt_file} not found.")
+        raise HTTPException(status_code=404, detail="Subtitle file not found")
 
 
 
