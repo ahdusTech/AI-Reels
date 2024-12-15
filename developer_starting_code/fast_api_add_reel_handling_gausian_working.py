@@ -321,7 +321,7 @@ def generate_transcript(input_file):
                 logging.info(line.strip())
             
             # Wait for the process to complete
-            process.wait()
+            process.wait(timeout=600)  # Set a timeout of 600 seconds (10 minutes)
             
             # Check for errors
             if process.returncode != 0:
