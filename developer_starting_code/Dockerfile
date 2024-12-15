@@ -10,7 +10,10 @@ WORKDIR /app
 
 # Install system dependencies required for OpenCV and other libraries
 RUN apt-get update && apt-get install -y \
-    libgl1-mesa-dev \
+    libgl1 \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements file to the working directory

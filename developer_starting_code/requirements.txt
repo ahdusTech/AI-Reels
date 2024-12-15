@@ -38,7 +38,7 @@ nvidia-nvjitlink-cu12==12.4.127
 nvidia-nvtx-cu12==12.4.127
 openai==1.57.0
 openai-whisper==20240930
-opencv-python==4.10.0.84
+opencv-python-headless==4.10.0.84
 pydantic==2.10.3
 pydantic_core==2.27.1
 python-dotenv==1.0.1
