@@ -26,6 +26,8 @@ steps:
     - '-f'
     - 'developer_starting_code/kubernetes/hpa.yaml'
 
+logsBucket: 'gs://ai_reels_bucket'
+
 substitutions:
   _CLUSTER_NAME: 'minimal-gke-cluster'
   _REGION: 'us-central1'
