@@ -1,36 +1,31 @@
 steps:
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/$PROJECT_ID/my-app:$SHORT_SHA', './developer_starting_code']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/my-app:$SHORT_SHA', './developer_starting_code']
 
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/my-app:$SHORT_SHA']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/my-app:$SHORT_SHA']
 
-- name: 'gcr.io/cloud-builders/gcloud'
-  args:
-    - 'container'
-    - 'clusters'
-    - 'get-credentials'
-    - 'minimal-gke-cluster'
-    - '--region'
-    - 'us-central1'
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'container'
+      - 'clusters'
+      - 'get-credentials'
+      - 'minimal-gke-cluster'
+      - '--region'
+      - 'us-central1'
 
-- name: 'gcr.io/cloud-builders/kubectl'
-  args:
-    - 'apply'
-    - '-f'
-    - 'developer_starting_code/kubernetes/deployment.yaml'
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - 'apply'
+      - '-f'
+      - 'developer_starting_code/kubernetes/deployment.yaml'
 
-- name: 'gcr.io/cloud-builders/kubectl'
-  args:
-    - 'apply'
-    - '-f'
-    - 'developer_starting_code/kubernetes/hpa.yaml'
-
-logsBucket: 'gs://ai_reels_bucket'
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - 'apply'
+      - '-f'
+      - 'developer_starting_code/kubernetes/hpa.yaml'
 
 options:
-  defaultLogsBucketBehavior: CLOUD_LOGGING_ONLY
-
-substitutions:
-  _CLUSTER_NAME: 'minimal-gke-cluster'
-  _REGION: 'us-central1'
+  logging: CLOUD_LOGGING_ONLY  # Store logs in Cloud Logging
+  logs_bucket: "gs://ai_reels_bucket"  # Specify the Cloud Storage bucket for logs
