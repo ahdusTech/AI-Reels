@@ -29,7 +29,7 @@ steps:
 logsBucket: 'gs://ai_reels_bucket'
 
 options:
-  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
+  defaultLogsBucketBehavior: CLOUD_LOGGING_ONLY
 
 substitutions:
   _CLUSTER_NAME: 'minimal-gke-cluster'
