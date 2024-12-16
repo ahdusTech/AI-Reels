@@ -26,8 +26,10 @@ steps:
     - '-f'
     - 'developer_starting_code/kubernetes/hpa.yaml'
 
+logsBucket: 'gs://ai_reels_bucket'
+
 options:
-  logging: CLOUD_LOGGING_ONLY
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
 
 substitutions:
   _CLUSTER_NAME: 'minimal-gke-cluster'
