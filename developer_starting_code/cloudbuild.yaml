@@ -28,4 +28,3 @@ steps:
 
 options:
   logging: CLOUD_LOGGING_ONLY  # Store logs in Cloud Logging
-  logs_bucket: "gs://ai_reels_bucket"  # Specify the Cloud Storage bucket for logs
